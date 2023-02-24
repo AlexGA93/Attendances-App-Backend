@@ -161,9 +161,66 @@ We're going to create a java class and an interface called:
     }
 
 ## Controller
+In the controller we are going to define all our endpoints and the Http request with the responses:
+When we define an endpoint we need to do a previous work:
+- Decorators
+  ```
+    /*
+    * Annotation for permitting cross-origin requests on specific handler classes and/or handler methods
+    * */
+    @CrossOrigin
+    /*
+  * Generates a constructor with required arguments. Required arguments are final fields and fields with constraints such as @NonNull.
+  * */
+    @RequiredArgsConstructor
+    /*
+  * A convenience annotation that is itself annotated with @Controller and @ResponseBody.
+    Types that carry this annotation are treated as controllers where @RequestMapping methods assume @ResponseBody semantics by default.
+  * */
+    @RestController
+    /*
+    * Annotation for mapping web requests onto methods in request-handling classes with flexible method signatures
+    * */
+    @RequestMapping("/api/classrooms")
+    ```
+-  Define a service as final variable
+  ```
+    // We are going to use our ClassroomService where there are all our methods
+    private final ClassroomService classService;
+  ```
+- Define endpoints
+  At this point we need to specify by a decorator our request method and endpoint:
+  ```
+  // SEARCH CLASSROOM BY ID
+    @GetMapping("/search-classroom/{id}") // POST - "/api/classrooms/search-classroom/{id}"
+  ```
+  Our endpoint will be declared as ResponseEntity<?> (<?> means that it can receive any data type) with the method's name and the arguments.
+  ```
+  // In this case we want to work with the id passed by the url
+  public ResponseEntity<?> searchById(@PathVariable Long id){}
+  ```
+  **IMPORTANT:** We can define a single variable as path variable or a body as payload (for example in a POST request). This last one will be defined as "@RequestBody <type> variable_name"
+  ```
+  public ResponseEntity<?> updateAttendance(@RequestBody Attendance attendance){...}
+  ```
+  Inside our endpoint will be the code that allows to deal with the information, validate data and send http request responses:
+  ```
+  @GetMapping("/search-classroom/{id}") // POST - "/api/classrooms/search-classroom/{id}"
+    public ResponseEntity<?> searchById(@PathVariable Long id){
+        // calling our classroom service method and store in a local variable
+        Optional<Classroom> foundClassroom = classService.searchClassroomById(id);
 
+        // validate if there is a found classroom
+        if(foundClassroom.isEmpty()){
+            String statusMessage = "Classroom not found!";
+            return new ResponseEntity<>(statusMessage, HttpStatus.NOT_FOUND);
+        }
 
+        // if a classroom is found return it = HTTP status code 200
+        return new ResponseEntity<>(foundClassroom.get(), HttpStatus.OK);
 
+    }
+  ```
 
 
 # Spring Project - Getting Started
